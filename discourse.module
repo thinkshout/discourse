@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains discourse.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function discourse_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the discourse module.
+    case 'help.page.discourse':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Discourse API integration.') . '</p>';
+      return $output;
+
+    default:
+  }
+}

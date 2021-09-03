@@ -1,0 +1,7 @@
+name: Discourse
+type: module
+description: 'Discourse API integration.'
+core_version_requirement: ^8.8 || ^9
+package: 'Discourse'
+dependencies:
+  - 'discourse_comments'
