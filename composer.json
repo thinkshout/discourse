@@ -7,5 +7,17 @@
   "support": {
     "issues": "https://github.com/thinkshout/discourse/issues",
     "source": "https://github.com/thinkshout/discourse"
+  },
+  "autoload": {
+    "psr-4": {
+      "Drupal\\discourse\\": "src/"
+    }
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
   }
 }

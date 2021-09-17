@@ -1,0 +1,6 @@
+discourse.discourse_settings_form:
+  title: 'Discourse Settings'
+  route_name: discourse.discourse_settings_form
+  description: 'Discourse Settings'
+  parent: system.admin_config_system
+  weight: 99
