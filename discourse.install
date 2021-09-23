@@ -12,6 +12,8 @@ use Drupal\field\Entity\FieldConfig;
  * Implements hook_install().
  */
 function discourse_install() {
+  // Generate discourse field
+  // @todo do we need to keep this functionality?
   $field_name = 'field_discourse';
   if (empty(FieldStorageConfig::loadByName('node', $field_name))) {
     $fieldStorage = FieldStorageConfig::create([
