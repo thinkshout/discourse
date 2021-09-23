@@ -1,0 +1,9 @@
+discourse_groups.discourse_settings_form:
+  path: '/admin/config/discourse/discourse_groups_settings'
+  defaults:
+    _form: '\Drupal\discourse\Form\DiscourseGroupSettingsForm'
+    _title: 'Discourse Groups Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
