@@ -166,3 +166,59 @@ function discourse_help($route_name, RouteMatchInterface $route_match) {
   }
   return $output;
 }
+
+/**
+ * Implements hook_entity_presave().
+ */
+function discourse_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'group') {
+    $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+    // Create the discourse group.
+    $group_response = $discourse_api_client->createGroup([
+      'group' => [
+        'name' => preg_replace('/\s+/', '_', $entity->label()),
+      ],
+    ]);
+
+    $created_group = Json::decode($group_response);
+
+    // Create the discourse category with just that group.
+    $group_perms = [];
+    $group_perms[$created_group["basic_group"]["name"]] = 1;
+
+    $category_response = $discourse_api_client->createCategory([
+      'name' => $entity->label(),
+      'permissions' => $group_perms,
+    ]);
+
+    $created_category = Json::decode($category_response);
+    // @todo add id to group entity.
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function discourse_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'group') {
+    $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+
+    // @todo Check for a category in discourse.
+    // If found, delete it.
+    // Check for a group in discourse.
+    // If found, delete it.
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function discourse_entity_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  // @todo Testing only
+  $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+
+  //$category = $discourse_api_client->getCategory(16);
+  //$discourse_api_client->deleteCategory(16);
+  //$discourse_api_client->updateCategory(15, ['name' => 'Test Group 2.5']);
+
+}
