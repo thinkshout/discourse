@@ -92,57 +92,23 @@ class DiscourseGroupSettingsForm extends ConfigFormBase {
         $enabled_groups = TRUE;
         // Add field config.
         $field_config = sprintf("field.field.group.%s.field_discourse_id", $group_type);
-        $config = \Drupal::service('config.factory')
-          ->getEditable($field_config);
-        $config->setData([
-          'langcode' => 'en',
-          'status' => true,
-          'dependencies' => [
-            'config' => [
-              0 => 'field.storage.group.field_discourse_id',
-              1 => sprintf('group.type.%s', $group_type),
-            ],
-            'module' => [
-              0 => 'field_permissions',
-            ],
-          ],
-          'third_party_settings' => [
-            'field_permissions' => [
-              'permission_type' => 'public',
-            ],
-          ],
-          'id' => sprintf('group.%s.field_discourse_id', $group_type),
-          'field_name' => 'field_discourse_id',
-          'entity_type' => 'group',
-          'bundle' => $group_type,
-          'label' => 'Discourse ID',
-          'description' => 'This ID will be added when this element has been connected to discourse.',
-          'required' => false,
-          'translatable' => false,
-          'default_value' => [
-          ],
-          'default_value_callback' => '',
-          'settings' => [
-          ],
-          'field_type' => 'string',
-        ]);
-        $config->save();
-
-        // @todo remove unless this can work without module install issues.
-//        // Load up field config data.
-//        $field_config_data = $this->loadConfigFromModule('field.field.group.placeholder.field_discourse_id');
+        // Load up field config data.
+        $field_config_data = $this->loadConfigFromModule('field.field.group.placeholder.field_discourse_id');
         // Change placeholder values.
-//        $field_config_data['value']['id'] = str_replace('PLACEHOLDER', $group_type, $field_config_data['value']['id']);
-//        $field_config_data['value']['bundle'] = $group_type;
-//        $config = \Drupal::service('config.factory')->getEditable($field_config);
-//        $config->setData($field_config_data['value']);
-//        $config->save();
+        $field_config_data['value']['id'] = str_replace('PLACEHOLDER', $group_type, $field_config_data['value']['id']);
+        $field_config_data['value']['bundle'] = $group_type;
+        $config = \Drupal::service('config.factory')->getEditable($field_config);
+        $config->setData($field_config_data['value']);
+        $config->save();
 
         // @todo Update entity_view config
 
         // @todo Update entity_form config
 
       }
+
+      // @todo add logic to process removal of group types.
+      // Delete config? Data loss warning?
     }
 
     // If groups were enabled...
