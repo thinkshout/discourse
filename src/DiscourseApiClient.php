@@ -139,16 +139,7 @@ class DiscourseApiClient {
 
       return $response->getBody()->getContents();
     }
-    catch (ConnectException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (ClientException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (RequestException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (GuzzleException $e) {
+    catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
       watchdog_exception('discourse', $e);
     }
 
@@ -435,6 +426,134 @@ class DiscourseApiClient {
       watchdog_exception('discourse', $e);
     }
     catch (GuzzleException $e) {
+      watchdog_exception('discourse', $e);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Creates a category.
+   *
+   * @param array $data
+   *  Category data to pass to the API.
+   *    - name (required)
+   *    - color
+   *    - text_color
+   *    - description
+   *
+   * @return false|string
+   */
+  public function createCategory(array $data) {
+    $uri = '/categories.json';
+    return $this->_postRequest($uri, $data);
+  }
+
+  /**
+   * Get category.
+   *
+   * @param int category_id
+   *   Topic id.
+   *
+   * @return string|bool
+   *   Returns category data.
+   */
+  public function getCategory(int $category_id) {
+    $uri = sprintf('/c/%s/show.json', $category_id);
+    return $this->_getRequest($uri);
+  }
+
+  public function deleteCategory(int $category_id) {
+    $uri = sprintf('/categories/%s.json', $category_id);
+    return $this->_deleteRequest($uri);
+  }
+
+  public function updateCategory(int $category_id, array $data) {
+    $uri = sprintf('/categories/%s.json', $category_id);
+    return $this->_putRequest($uri, $data);
+  }
+
+  /**
+   * Create a Group.
+   * @param array $data
+   *
+   * @return false|string
+   */
+  public function createGroup(array $data) {
+    $uri = '/admin/groups.json';
+    return $this->_postRequest($uri, $data);
+  }
+
+  public function getGroup(int $category_id) {
+    $uri = sprintf('/group/%s.json', $category_id);
+    return $this->_getRequest($uri);
+  }
+
+  public function deleteGroup(int $category_id) {
+    $uri = sprintf('/admin/groups/%s.json', $category_id);
+    return $this->_deleteRequest($uri);
+  }
+
+  public function updateGroup(int $category_id, array $data) {
+    $uri = sprintf('/group/%s.json', $category_id);
+    return $this->_putRequest($uri, $data);
+  }
+
+
+
+  private function _getRequest($uri) {
+    try {
+      $response = $this->client->get($uri, [
+        'headers' => $this->apiHeaders,
+      ]);
+      return $response->getBody()->getContents();
+    }
+    catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
+      watchdog_exception('discourse', $e);
+    }
+    return FALSE;
+  }
+
+  private function _postRequest($uri, $data) {
+    $headers = $this->apiHeaders;
+    $headers['Content-Type'] = 'multipart/form-data';
+    $headers['Accept'] = 'application/json; charset=utf-8';
+    $headers['content-encoding'] = 'gzip';
+
+    try {
+      $response = $this->client->post($uri, [
+        'form_params' => $data,
+        'headers' => $headers,
+      ]);
+      return $response->getBody()->getContents();
+    }
+    catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
+      watchdog_exception('discourse', $e);
+    }
+    return FALSE;
+  }
+
+  private function _putRequest($uri, $data) {
+    try {
+      $response = $this->client->put($uri, [
+        'form_params' => $data,
+        'headers' => $this->apiHeaders,
+      ]);
+      return $response->getBody()->getContents();
+    }
+    catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
+      watchdog_exception('discourse', $e);
+    }
+    return FALSE;
+  }
+
+  private function _deleteRequest($uri) {
+    try {
+      $response = $this->client->delete($uri, [
+        'headers' => $this->apiHeaders,
+      ]);
+      return $response->getBody()->getContents();
+    }
+    catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
       watchdog_exception('discourse', $e);
     }
     return FALSE;
