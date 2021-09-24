@@ -101,10 +101,8 @@ class DiscourseGroupsSettingsForm extends ConfigFormBase {
         $config->setData($field_config_data['value']);
         $config->save();
 
-        // @todo Update entity_view config
-
-        // @todo Update entity_form config
-
+        // @todo Update entity_view config?
+        // @todo Update entity_form config?
       }
 
       // @todo add logic to process removal of group types.
