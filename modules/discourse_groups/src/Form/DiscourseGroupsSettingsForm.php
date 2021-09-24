@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class DiscourseSettingsForm.
  */
-class DiscourseGroupSettingsForm extends ConfigFormBase {
+class DiscourseGroupsSettingsForm extends ConfigFormBase {
 
   /**
    * Drupal\Core\Entity\EntityTypeManagerInterface definition.
@@ -140,7 +140,7 @@ class DiscourseGroupSettingsForm extends ConfigFormBase {
    *   An array representation of a yml file.
    */
   private function loadConfigFromModule(string $configName) {
-    $file = drupal_get_path('module', 'discourse_groups') . '/config/optional/' . $configName . '.yml';
+    $file = drupal_get_path('module', 'discourse_groups') . '/config/templates/' . $configName . '.yml';
     $raw = file_get_contents($file);
     if (empty($raw)) {
       throw new \RuntimeException(sprintf('Config file not found at %s', $file));
