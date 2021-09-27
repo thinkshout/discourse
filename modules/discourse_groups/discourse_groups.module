@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * @file
+ * Contains discourse groups module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function discourse_groups_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+  switch ($route_name) {
+    // Main module help for the discourse module.
+    case 'help.page.discourse':
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Discourse API and Groups integration.') . '</p>';
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function discourse_groups_entity_presave(EntityInterface $entity) {
+  // Categories and groups in discourse cannot be duplicated.
+  if ($entity->getEntityTypeId() == 'group') {
+    // If this group has a discourse id field that is empty.
+    if ($entity->hasField('field_discourse_category_id') && $entity->hasField('field_discourse_group_id')) {
+      $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+
+      // If the category id is empty create to Discourse category and group.
+      if (($discourse_category_id = $entity->get('field_discourse_category_id')) && $discourse_category_id->isEmpty()) {
+        // Create the discourse group.
+        $group_response = $discourse_api_client->createGroup([
+          'group' => [
+            'name' => _discourse_groups_format_group_name($entity->label()),
+          ],
+        ]);
+
+        $created_group = Json::decode($group_response);
+
+        // Create the discourse category with just that group.
+        $group_perms = [];
+        $group_perms[$created_group["basic_group"]["name"]] = 1;
+
+        $category_response = $discourse_api_client->createCategory([
+          'name' => $entity->label(),
+          'permissions' => $group_perms,
+        ]);
+
+        $created_category = Json::decode($category_response);
+
+        $entity->set('field_discourse_category_id', $created_category['category']['id']);
+        $entity->set('field_discourse_group_id', [$created_group["basic_group"]['name']]);
+      }
+      // Otherwise, this already exists in Discourse.
+      else {
+        // If this is an existing group check for a name change.
+        if (!$entity->isNew() && $entity->original->label() !== $entity->label()) {
+          $discourse_api_client->updateCategory($discourse_category_id->getString(), ['name' => $entity->label()]);
+          $discourse_group_name = $entity->get('field_discourse_group_id')->getString();
+          // Get the group id.
+          $discourse_group_id = $discourse_api_client->getGroupId($discourse_group_name);
+          // Save the new group name.
+          $new_group_name = _discourse_groups_format_group_name($entity->label());
+          $updated_group_response = $discourse_api_client->updateGroup($discourse_group_id, [
+            'group' => [
+              'name' => $new_group_name,
+            ],
+          ]);
+          $updated_group = Json::decode($updated_group_response);
+          if (isset($updated_group['success'])) {
+            $entity->set('field_discourse_group_id', $new_group_name);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function discourse_groups_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'group') {
+    if ($entity->hasField('field_discourse_category_id') && $entity->hasField('field_discourse_group_id')) {
+      $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+      // Delete the group.
+      $group_name = $entity->get('field_discourse_group_id');
+      if (!$group_name->isEmpty()) {
+        $group_id = $discourse_api_client->getGroupId($group_name->getString());
+        $deleted_group_respnse = $discourse_api_client->deleteGroup($group_id);
+        $deleted_group = Json::decode($deleted_group_respnse);
+        if (isset($deleted_group['success'])) {
+          \Drupal::messenger()->addStatus(t('Successfully deleted Discourse group: @group', ['@group' => $group_name->getString()]));
+        }
+        else {
+          $message = t('Unable to delete Discourse group: @group', ['@group' => $group_name->getString()]);
+          \Drupal::logger('discourse_groups')->error($message);
+          \Drupal::messenger()->addError($message);
+        }
+      }
+
+      // Delete the category.
+      $category_id = $entity->get('field_discourse_category_id');
+      if (!$category_id->isEmpty()) {
+        $deleted_category_response = $discourse_api_client->deleteCategory($category_id->getString());
+        $deleted_category = Json::decode($deleted_category_response);
+        if (isset($deleted_category['success'])) {
+          \Drupal::messenger()->addStatus(t('Successfully deleted Discourse category: @category', ['@category' => $category_id->getString()]));
+        }
+        else {
+          $message = t('Unable to delete Discourse category: @group', ['@group' => $group_name->getString()]);
+          \Drupal::logger('discourse_groups')->error($message);
+          \Drupal::messenger()->addError($message);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_BASE_ID_alter().
+ */
+function discourse_groups_form_group_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // @todo Add validation to prevent duplicated group names?
+  // Disable discourse form elements.
+  $form['field_discourse_category_id']['widget'][0]['value']['#attributes']['disabled'] = 'disabled';
+  $form['field_discourse_group_id']['widget'][0]['value']['#attributes']['disabled'] = 'disabled';
+}
+
+/**
+ * Format name to meet discourse naming requirements.
+ *
+ * @param string $name
+ *   Name to format.
+ *
+ * @return string
+ *   Formatted name.
+ */
+function _discourse_groups_format_group_name(string $name) {
+  return preg_replace('/\s+/', '_', $name);
+}

@@ -16,7 +16,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 
 /**
- * Class DiscourseApiClient.
+ * Discourse API functionality.
  *
  * @package Drupal\discourse
  */
@@ -435,72 +435,150 @@ class DiscourseApiClient {
    * Creates a category.
    *
    * @param array $data
-   *  Category data to pass to the API.
+   *   Category data to pass to the API.
    *    - name (required)
    *    - color
    *    - text_color
-   *    - description
+   *    - description.
    *
-   * @return false|string
+   * @return string|bool
+   *   JSON response or FALSE.
    */
   public function createCategory(array $data) {
     $uri = '/categories.json';
-    return $this->_postRequest($uri, $data);
+    return $this->postRequest($uri, $data);
   }
 
   /**
-   * Get category.
+   * Get a category.
    *
-   * @param int category_id
-   *   Topic id.
+   * @param int $category_id
+   *   Category id.
    *
    * @return string|bool
-   *   Returns category data.
+   *   Returns JSON response or FALSE.
    */
   public function getCategory(int $category_id) {
     $uri = sprintf('/c/%s/show.json', $category_id);
-    return $this->_getRequest($uri);
+    return $this->getRequest($uri);
   }
 
+  /**
+   * Delete a category.
+   *
+   * @param int $category_id
+   *   Category id.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
   public function deleteCategory(int $category_id) {
     $uri = sprintf('/categories/%s.json', $category_id);
-    return $this->_deleteRequest($uri);
+    return $this->deleteRequest($uri);
   }
 
+  /**
+   * Update a Category.
+   *
+   * @param int $category_id
+   *   Category id.
+   * @param array $data
+   *   Category data to pass to the API.
+   *    - name
+   *    - color
+   *    - text_color
+   *    - description.
+   */
   public function updateCategory(int $category_id, array $data) {
     $uri = sprintf('/categories/%s.json', $category_id);
-    return $this->_putRequest($uri, $data);
+    return $this->putRequest($uri, $data);
   }
 
   /**
    * Create a Group.
-   * @param array $data
    *
-   * @return false|string
+   * @param array $data
+   *   Group data to pass to the API nested under key of group.
+   *    'group' => ['name' => 'value',].
+   *
+   * @return string|bool
+   *   JSON response or FALSE.
    */
   public function createGroup(array $data) {
     $uri = '/admin/groups.json';
-    return $this->_postRequest($uri, $data);
+    return $this->postRequest($uri, $data);
   }
 
-  public function getGroup(int $category_id) {
-    $uri = sprintf('/group/%s.json', $category_id);
-    return $this->_getRequest($uri);
+  /**
+   * Get a group.
+   *
+   * @param string $group_name
+   *   The name of the group.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function getGroup(string $group_name) {
+    $uri = sprintf('/groups/%s.json', $group_name);
+    return $this->getRequest($uri);
   }
 
-  public function deleteGroup(int $category_id) {
-    $uri = sprintf('/admin/groups/%s.json', $category_id);
-    return $this->_deleteRequest($uri);
+  /**
+   * Get a group id.
+   *
+   * Because the getGroup method requires a name, not id this helper
+   * method provides the group id for a given group name.
+   *
+   * @param string $group_name
+   *   The name of the group.
+   *
+   * @return string
+   *   Returns the id of the group.
+   */
+  public function getGroupId(string $group_name) {
+    $group = $this->getGroup($group_name);
+    $group_array = Json::decode($group);
+    return $group_array['group']['id'];
   }
 
-  public function updateGroup(int $category_id, array $data) {
-    $uri = sprintf('/group/%s.json', $category_id);
-    return $this->_putRequest($uri, $data);
+  /**
+   * Delete a group.
+   *
+   * @param int $group_id
+   *   Category id.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function deleteGroup(int $group_id) {
+    $uri = sprintf('/admin/groups/%s.json', $group_id);
+    return $this->deleteRequest($uri);
   }
 
+  /**
+   * Update a group.
+   *
+   * @param int $group_id
+   *   Group id.
+   * @param array $data
+   *   Group data to pass to the API nested under key of group.
+   *    'group' => ['name' => 'value',].
+   */
+  public function updateGroup(int $group_id, array $data) {
+    $uri = sprintf('/groups/%s.json', $group_id);
+    return $this->putRequest($uri, $data);
+  }
 
-
-  private function _getRequest($uri) {
+  /**
+   * Get Request.
+   *
+   * @param string $uri
+   *   Request path.
+   *
+   * @return string|bool
+   *   JSON or FALSE.
+   */
+  private function getRequest(string $uri) {
     try {
       $response = $this->client->get($uri, [
         'headers' => $this->apiHeaders,
@@ -513,7 +591,18 @@ class DiscourseApiClient {
     return FALSE;
   }
 
-  private function _postRequest($uri, $data) {
+  /**
+   * Post Request (for creating new content).
+   *
+   * @param string $uri
+   *   Request path.
+   * @param array $data
+   *   Data for the request.
+   *
+   * @return string|bool
+   *   JSON or FALSE.
+   */
+  private function postRequest(string $uri, array $data) {
     $headers = $this->apiHeaders;
     $headers['Content-Type'] = 'multipart/form-data';
     $headers['Accept'] = 'application/json; charset=utf-8';
@@ -532,7 +621,18 @@ class DiscourseApiClient {
     return FALSE;
   }
 
-  private function _putRequest($uri, $data) {
+  /**
+   * Put Request (for updating content).
+   *
+   * @param string $uri
+   *   Request path.
+   * @param array $data
+   *   Data for the request.
+   *
+   * @return string|bool
+   *   JSON or FALSE.
+   */
+  private function putRequest(string $uri, array $data) {
     try {
       $response = $this->client->put($uri, [
         'form_params' => $data,
@@ -546,7 +646,16 @@ class DiscourseApiClient {
     return FALSE;
   }
 
-  private function _deleteRequest($uri) {
+  /**
+   * Delete Request.
+   *
+   * @param string $uri
+   *   Request path.
+   *
+   * @return string|bool
+   *   JSON or FALSE.
+   */
+  private function deleteRequest(string $uri) {
     try {
       $response = $this->client->delete($uri, [
         'headers' => $this->apiHeaders,
@@ -558,4 +667,5 @@ class DiscourseApiClient {
     }
     return FALSE;
   }
+
 }

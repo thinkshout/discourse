@@ -2,19 +2,19 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.group.field_discourse_id
+    - field.storage.group.field_discourse_group_id
     - group.type.members
   module:
     - field_permissions
 third_party_settings:
   field_permissions:
     permission_type: public
-id: group.PLACEHOLDER.field_discourse_id
-field_name: field_discourse_id
+id: group.PLACEHOLDER.field_discourse_group_id
+field_name: field_discourse_group_id
 entity_type: group
 bundle: PLACEHOLDER
-label: 'Discourse ID'
-description: 'This ID will be added when this element has been connected to discourse.'
+label: 'Discourse Group ID'
+description: 'This will be populated with a Discourse group ID when this group is properly connected.'
 required: false
 translatable: false
 default_value: {  }

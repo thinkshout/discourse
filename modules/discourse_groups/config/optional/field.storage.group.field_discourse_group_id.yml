@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - group
-id: group.field_discourse_id
-field_name: field_discourse_id
+id: group.field_discourse_group_id
+field_name: field_discourse_group_id
 entity_type: group
 type: string
 settings:

@@ -1,5 +1,5 @@
 discourse_groups.discourse_settings_form:
-  title: 'Discourse GroupsSettings'
+  title: 'Discourse Groups Settings'
   route_name: discourse_groups.discourse_settings_form
   description: 'Discourse Groups Settings'
   parent: system.admin_config_system
