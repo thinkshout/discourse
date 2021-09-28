@@ -1,0 +1,9 @@
+name: Discourse Comments
+type: module
+description: 'Discourse topics and comments integration.'
+core_version_requirement: ^8.8 || ^9
+package: 'Discourse'
+configure: discourse_comments.discourse_comments_settings_form
+dependencies:
+  - discourse
+  - drupal:field

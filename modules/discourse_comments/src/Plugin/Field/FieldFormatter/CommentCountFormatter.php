@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\discourse\Plugin\Field\FieldFormatter;
+namespace Drupal\discourse_comments\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
@@ -12,7 +12,7 @@ use Drupal\Core\Field\FormatterBase;
  *   id = "comment_count_formatter",
  *   label = @Translation("Comment count formatter"),
  *   field_types = {
- *     "discourse_field"
+ *     "discourse_comments_field"
  *   }
  * )
  */

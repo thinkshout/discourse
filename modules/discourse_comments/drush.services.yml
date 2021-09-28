@@ -1,6 +1,6 @@
 services:
   discourse.fetch_comments:
-    class: \Drupal\discourse\Commands\FetchLatestComments
+    class: \Drupal\discourse_comments\Commands\FetchLatestComments
     arguments: ['@discourse.discourse_api_client', '@cache.default']
     tags:
       - { name: drush.command }

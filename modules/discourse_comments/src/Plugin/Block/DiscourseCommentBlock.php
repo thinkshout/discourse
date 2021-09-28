@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\discourse\Plugin\Block;
+namespace Drupal\discourse_comments\Plugin\Block;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Block\BlockBase;
@@ -65,15 +65,15 @@ class DiscourseCommentBlock extends BlockBase implements ContainerFactoryPluginI
     $build = [];
 
     $node = $this->currentRouteMatch->getParameter('node');
-    $discourse_settings = $this->configFactory->get('discourse.discourse_settings');
-    if ($node instanceof NodeInterface && $node->hasField('discourse_field')) {
-      $field_discourse = $node->get('discourse_field')->getValue();
-      if (isset($field_discourse[0]['topic_id']) && is_numeric($field_discourse[0]['topic_id'])) {
-        $topic = Json::decode($this->discourseApiClient->getTopic($field_discourse[0]['topic_id']));
+    $discourse_settings = $this->configFactory->get('discourse.discourse_comments_settings');
+    if ($node instanceof NodeInterface && $node->hasField('discourse_comments_field')) {
+      $field_discourse_comments = $node->get('discourse_comments_field')->getValue();
+      if (isset($field_discourse_comments[0]['topic_id']) && is_numeric($field_discourse_comments[0]['topic_id'])) {
+        $topic = Json::decode($this->discourseApiClient->getTopic($field_discourse_comments[0]['topic_id']));
         // Save topic count.
         $post_count = ($topic['posts_count'] > 0) ? ($topic['posts_count'] - 1) : 0;
-        $field_discourse[0]['comment_count'] = $post_count;
-        $node->set('discourse_field', $field_discourse)->save();
+        $field_discourse_comments[0]['comment_count'] = $post_count;
+        $node->set('discourse_comments_field', $field_discourse_comments)->save();
         $comments = [];
         $default_avatar_image = $this->discourseApiClient->getDefaultAvatar();
         if (isset($topic['post_stream']) && isset($topic['post_stream']['posts'])) {
@@ -107,7 +107,7 @@ class DiscourseCommentBlock extends BlockBase implements ContainerFactoryPluginI
 
         $build['#theme'] = 'discourse_comment_block';
         $build['#content'] = $comments;
-        $build['#topic_url'] = $field_discourse[0]['topic_url'];
+        $build['#topic_url'] = $field_discourse_comments[0]['topic_url'];
         $build['#forum_link'] = $discourse_settings->get('forum_link');
         $build['#forum_link_label'] = $discourse_settings->get('forum_link_label');
       }

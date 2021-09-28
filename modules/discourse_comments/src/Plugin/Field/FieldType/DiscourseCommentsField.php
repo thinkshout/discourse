@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\discourse\Plugin\Field\FieldType;
+namespace Drupal\discourse_comments\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -8,15 +8,15 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
- * Plugin implementation of the 'discourse_field' field type.
+ * Plugin implementation of the 'discourse_comments_field' field type.
  *
  * @FieldType(
- *   id = "discourse_field",
- *   label = @Translation("Discourse field"),
- *   description = @Translation("Discourse field settings") * ),
- *   default_widget = "discourse_widget",
+ *   id = "discourse_comments_field",
+ *   label = @Translation("Discourse comments field"),
+ *   description = @Translation("Discourse comments field settings") * ),
+ *   default_widget = "discourse_comments_widget",
  */
-class DiscourseField extends FieldItemBase {
+class DiscourseCommentsField extends FieldItemBase {
 
   /**
    * {@inheritdoc}

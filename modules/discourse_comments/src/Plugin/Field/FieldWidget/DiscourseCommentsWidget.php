@@ -13,18 +13,18 @@ use Drupal\node\Entity\Node;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Plugin implementation of the 'discourse_widget' widget.
+ * Plugin implementation of the 'discourse_comments_widget' widget.
  *
  * @FieldWidget(
- *   id = "discourse_widget",
- *   module = "discourse",
- *   label = @Translation("Discourse widget"),
+ *   id = "discourse_comments_widget",
+ *   module = "discourse_comments",
+ *   label = @Translation("Discourse Comments widget"),
  *   field_types = {
- *     "discourse_field"
+ *     "discourse_comments_field"
  *   }
  * )
  */
-class DiscourseWidget extends WidgetBase {
+class DiscourseCommentsWidget extends WidgetBase {
 
   /**
    * Discourse Api Client service.
@@ -76,8 +76,8 @@ class DiscourseWidget extends WidgetBase {
       $content_type = $node->getType();
     }
 
-    $discourse_config = $this->configFactory->get('discourse.discourse_settings');
-    $content_types_enabled_for_discourse = $discourse_config->get('content_types_enabled_for_discourse');
+    $discourse_comments_config = $this->configFactory->get('discourse.discourse_comments_settings');
+    $content_types_enabled_for_discourse = $discourse_comments_config->get('content_types_enabled_for_discourse');
     $default_content_type_setting = 0;
     if (isset($content_types_enabled_for_discourse[$content_type]) && $content_types_enabled_for_discourse[$content_type]) {
       $default_content_type_setting = 1;
@@ -97,9 +97,10 @@ class DiscourseWidget extends WidgetBase {
       '#default_value' => isset($items[$delta]->push_to_discourse) ? $items[$delta]->push_to_discourse : $default_content_type_setting,
     ];
 
+    $discourse_config = $this->configFactory->get('discourse.discourse_settings');
     if (isset($discourse_config) && $discourse_config->get('base_url_of_discourse') != '') {
       $options = [];
-      $default_category = $discourse_config->get('default_category');
+      $default_category = $discourse_comments_config->get('default_category');
       $category_content = $this->discourseApiClient->getCategories();
       if ($category_content) {
         foreach ($category_content['category_list']['categories'] as $cat) {

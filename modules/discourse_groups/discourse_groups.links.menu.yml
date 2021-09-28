@@ -2,5 +2,5 @@ discourse_groups.discourse_settings_form:
   title: 'Discourse Groups Settings'
   route_name: discourse_groups.discourse_settings_form
   description: 'Discourse Groups Settings'
-  parent: system.admin_config_system
-  weight: 100
+  parent: discourse.admin_config_discourse
+  weight: 1

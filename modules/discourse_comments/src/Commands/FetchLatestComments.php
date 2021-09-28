@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\discourse\Commands;
+namespace Drupal\discourse_comments\Commands;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -8,7 +8,7 @@ use Drupal\discourse\DiscourseApiClient;
 use Drush\Commands\DrushCommands;
 
 /**
- * A Drush commandfile for adding drush commands.
+ * A Drush command file for adding drush commands.
  */
 class FetchLatestComments extends DrushCommands {
 

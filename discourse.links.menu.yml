@@ -1,6 +1,11 @@
+discourse.admin_config_discourse:
+  route_name: discourse.admin_config_discourse
+  parent: system.admin_config
+  title: Discourse
+  description: 'Manage settings for Discourse.'
 discourse.discourse_settings_form:
-  title: 'Discourse Settings'
+  title: 'Discourse API Settings'
   route_name: discourse.discourse_settings_form
   description: 'Discourse Settings'
-  parent: system.admin_config_system
-  weight: 99
+  parent: discourse.admin_config_discourse
+  weight: -1

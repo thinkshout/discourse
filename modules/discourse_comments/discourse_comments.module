@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains discourse module.
+ * Contains discourse comments module.
  */
 
 use Drupal\Component\Serialization\Json;
@@ -16,7 +16,7 @@ use Drupal\node\Entity\Node;
 /**
  * Implements hook_theme().
  */
-function discourse_theme() {
+function discourse_comments_theme() {
   return [
     'discourse_comment_block' => [
       'variables' => [
@@ -44,12 +44,12 @@ function discourse_theme() {
 /**
  * Implements hook_entity_base_field_info().
  */
-function discourse_entity_base_field_info(EntityTypeInterface $entity_type) {
+function discourse_comments_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
 
-  // Add a 'discourse_field' base field to all node types.
+  // Add a 'discourse_comments_field' base field to all node types.
   if ($entity_type->id() === 'node') {
-    $fields['discourse_field'] = BaseFieldDefinition::create('discourse_field')
+    $fields['discourse_comments_field'] = BaseFieldDefinition::create('discourse_comments_field')
       ->setLabel(t('Discourse Comments'))
       ->setDescription(t('Discourse comment settings.'))
       ->setRevisionable(TRUE)
@@ -67,15 +67,15 @@ function discourse_entity_base_field_info(EntityTypeInterface $entity_type) {
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function discourse_form_node_form_alter(&$form, &$form_state, $form_id) {
+function discourse_comments_form_node_form_alter(&$form, &$form_state, $form_id) {
   // If discourse enabled.
-  if (isset($form['discourse_field'])) {
+  if (isset($form['discourse_comments_field'])) {
     $node = $form_state->getFormObject()->getEntity();
     // Checking edit form.
     if ($form_state->getFormObject()->getOperation() == 'edit') {
-      if ($node->get('discourse_field')->push_to_discourse != 1) {
+      if ($node->get('discourse_comments_field')->push_to_discourse != 1) {
         // If push_to_discourse is not enabled.
-        $form['discourse_field']['widget'][0]['push_to_discourse']['#default_value'] = 0;
+        $form['discourse_comments_field']['widget'][0]['push_to_discourse']['#default_value'] = 0;
       }
     }
     $form['actions']['submit']['#submit'][] = '_post_node_to_discourse';
@@ -97,8 +97,8 @@ function discourse_form_node_form_alter(&$form, &$form_state, $form_id) {
 function _post_node_to_discourse($form, FormStateInterface &$form_state) {
   $form_values = $form_state->getValues();
   $node = $form_state->getFormObject()->getEntity();
-  $discourse_topic_id = $node->get('discourse_field')->topic_id;
-  $post_condition = $discourse_topic_id == NULL && $discourse_topic_id !== '' && $form_values['discourse_field'][0]['push_to_discourse'] == 1 && $node->isPublished();
+  $discourse_topic_id = $node->get('discourse_comments_field')->topic_id;
+  $post_condition = $discourse_topic_id == NULL && $discourse_topic_id !== '' && $form_values['discourse_comments_field'][0]['push_to_discourse'] == 1 && $node->isPublished();
   if ($post_condition) {
     $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
     $footer_markup = _discourse_footer_markup($node);
@@ -107,20 +107,20 @@ function _post_node_to_discourse($form, FormStateInterface &$form_state) {
     $response = $discourse_api_client->postTopic([
       'title' => $form_values['title'][0]['value'],
       'raw' => $body,
-      'category' => $form_values['discourse_field'][0]['category'],
+      'category' => $form_values['discourse_comments_field'][0]['category'],
     ]);
 
     $created_topic = Json::decode($response);
 
     // Get topic details and save it in discourse field of the node.
-    $discourse_form_values = $form_values['discourse_field'];
+    $discourse_form_values = $form_values['discourse_comments_field'];
     $discourse_form_values[0]['topic_id'] = $created_topic['topic_id'];
     $topic_url = sprintf('%s/t/%s/%s', $discourse_api_client->getBaseUrl(), $created_topic['topic_slug'], $created_topic['topic_id']);
     $discourse_form_values[0]['topic_url'] = $topic_url;
     $discourse_form_values[0]['comment_count'] = $created_topic['reply_count'];
 
-    // Change the discourse_field according to returned values.
-    $node->set('discourse_field', $discourse_form_values);
+    // Change the discourse_comments_field according to returned values.
+    $node->set('discourse_comments_field', $discourse_form_values);
     $node->save();
   }
 
@@ -155,7 +155,7 @@ function _discourse_footer_markup(Node $node) {
 /**
  * Implements hook_help().
  */
-function discourse_help($route_name, RouteMatchInterface $route_match) {
+function discourse_comments_help($route_name, RouteMatchInterface $route_match) {
   $output = '';
   switch ($route_name) {
     // Main module help for the discourse module.

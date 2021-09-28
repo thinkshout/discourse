@@ -1,8 +1,16 @@
+discourse.admin_config_discourse:
+  path: '/admin/config/discourse'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Discourse'
+    _description: 'Manage settings for Discourse.'
+  requirements:
+    _permission: 'administer site configuration'
 discourse.discourse_settings_form:
   path: '/admin/config/discourse/discourse_settings'
   defaults:
     _form: '\Drupal\discourse\Form\DiscourseSettingsForm'
-    _title: 'Discourse Settings'
+    _title: 'Discourse API Settings'
   requirements:
     _permission: 'administer site configuration'
   options:

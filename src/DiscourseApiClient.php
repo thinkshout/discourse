@@ -260,7 +260,7 @@ class DiscourseApiClient {
   public function getNodeFromTopicId($topic_id) {
     $query = $this->database->select('node_field_data', 'nf');
     $query->addField('nf', 'nid');
-    $query->condition('nf.discourse_field__topic_id', $topic_id);
+    $query->condition('nf.discourse_comments_field__topic_id', $topic_id);
     $results = $query->execute();
     $results = $results->fetch();
     $nid = 0;
@@ -313,8 +313,8 @@ class DiscourseApiClient {
    */
   public function getTopicIdsWithComments() {
     $query = $this->database->select('node_field_data', 'nf');
-    $query->addField('nf', 'discourse_field__topic_id');
-    $query->condition('nf.discourse_field__comment_count', 0, '>');
+    $query->addField('nf', 'discourse_comments_field__topic_id');
+    $query->condition('nf.discourse_comments_field__comment_count', 0, '>');
     $query->condition('nf.status', 1);
     $query->orderBy('created', 'DESC');
     $query->range(0, 20);
@@ -322,7 +322,7 @@ class DiscourseApiClient {
     $results = $results->fetchAll();
     $topic_ids = [];
     foreach ($results as $record) {
-      $topic_ids[] = $record->discourse_field__topic_id;
+      $topic_ids[] = $record->discourse_comments_field__topic_id;
     }
 
     if (count($topic_ids) > 0) {

@@ -1,0 +1,6 @@
+discourse_comments.discourse_comments_settings_form:
+  title: 'Discourse Comments Settings'
+  route_name: discourse_comments.discourse_comments_settings_form
+  description: 'Discourse Comments Settings'
+  parent: discourse.admin_config_discourse
+  weight: 0
