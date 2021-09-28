@@ -55,7 +55,8 @@ function discourse_comments_entity_base_field_info(EntityTypeInterface $entity_t
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayOptions('form', [
-        'type' => 'discourse_widget',
+        'type' => 'discourse_comments_widget',
+        'region' => 'hidden',
         'weight' => 100,
       ])
       ->setDisplayConfigurable('form', TRUE);
