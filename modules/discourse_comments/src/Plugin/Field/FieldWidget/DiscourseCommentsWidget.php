@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\discourse\Plugin\Field\FieldWidget;
+namespace Drupal\discourse_comments\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Field\FieldDefinitionInterface;
