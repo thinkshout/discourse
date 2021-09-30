@@ -106,9 +106,71 @@ function discourse_membership_help($route_name, RouteMatchInterface $route_match
 
 /**
  * Implements hook_entity_delete().
- *
- * @todo do we need to delete users in discourse?
  */
 function discourse_membership_entity_delete(EntityInterface $entity) {
+  // @todo Do we need to delete users in discourse?
+  switch ($entity->getEntityTypeId()) {
+    // Act on group membership deletions.
+    case 'group_content':
+      if ($entity->getContentPlugin()->getPluginId() == 'group_membership') {
+        // Get the group.
+        $group = $entity->getGroup();
+        // Check for discourse category id field value.
+        if ($group->hasField('discourse_groups_field') && ($group_id = $group->get('discourse_groups_field')->group_id) && !empty($group_id)) {
+          // Get the user.
+          $user = $entity->get('entity_id')->entity;
+          // Check for discourse user.
+          $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+          if (($discourse_username = $user->get('discourse_user_field')->username) && !empty($discourse_username)) {
+            // Remove user from group.
+            $discourse_api_client->removeUsersFromGroup($group_id, $discourse_username);
+          }
+        }
+      }
+      break;
+  }
+}
 
+/**
+ * Implements hook_entity_presave().
+ */
+function discourse_membership_entity_presave(EntityInterface $entity) {
+  switch ($entity->getEntityTypeId()) {
+    // Act on new group memberships.
+    case 'group_content':
+      if ($entity->getContentPlugin()->getPluginId() == 'group_membership') {
+        $group = $entity->getGroup();
+        // Check for discourse category id field value.
+        if ($group->hasField('discourse_groups_field') && ($group_id = $group->get('discourse_groups_field')->group_id) && !empty($group_id)) {
+          $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+          $user = $entity->get('entity_id')->entity;
+          // If the user exists in Discourse.
+          if (($discourse_username = $user->get('discourse_user_field')->username) && !empty($discourse_username)) {
+            $discourse_api_client->addUsersToGroup($group_id, $discourse_username);
+          }
+          // Otherwise, the user isn't yet in Discourse.
+          else {
+            // Create the discourse user.
+            $created_user_response = $discourse_api_client->createUser([
+              'name' => $user->getAccountName(),
+              'email' => $user->getEmail(),
+              'password' => user_password(10),
+              'username' => $user->getAccountName(),
+              'active' => TRUE,
+              'approved' => TRUE,
+              'user_fields[1]' => TRUE,
+            ]);
+            $created_user = Json::decode($created_user_response);
+            if ($created_user['user_id']) {
+              $discourse_api_client->addUsersToGroup($group_id, $user->getAccountName());
+              // Save the discourse user values back to the Drupal user.
+              $user->discourse_user_field->username = $user->getAccountName();
+              $user->discourse_user_field->user_id = $created_user['user_id'];
+              $user->save();
+            }
+          }
+        }
+      }
+      break;
+  }
 }

@@ -51,7 +51,7 @@ class DiscourseGroupsWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('discourse.discourse_api_client'), $container->get('config.factory'), $container->get('current_route_match'));
+    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('config.factory'), $container->get('current_route_match'));
   }
 
   /**
