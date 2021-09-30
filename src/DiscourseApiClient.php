@@ -545,10 +545,91 @@ class DiscourseApiClient {
    * @param array $data
    *   Group data to pass to the API nested under key of group.
    *    'group' => ['name' => 'value',].
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
    */
   public function updateGroup(int $group_id, array $data) {
     $uri = sprintf('/groups/%s.json', $group_id);
     return $this->putRequest($uri, $data);
+  }
+
+  /**
+   * Add users to a group.
+   *
+   * @param int $group_id
+   *   Group id.
+   * @param string $usernames
+   *   Comma separated list of usernames to add to the group.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function addUsersToGroup(int $group_id, string $usernames) {
+    $uri = sprintf('/groups/%s/members.json', $group_id);
+    $data = [
+      'usernames' => $usernames,
+    ];
+    return $this->putRequest($uri, $data);
+  }
+
+  /**
+   * Remove users from a group.
+   *
+   * @param int $group_id
+   *   Group id.
+   * @param string $usernames
+   *   Comma separated list of usernames to add to the group.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function removeUsersFromGroup(int $group_id, string $usernames) {
+    $uri = sprintf('/groups/%s/members.json', $group_id);
+    $data = [
+      'usernames' => $usernames,
+    ];
+    return $this->deleteRequest($uri, $data);
+  }
+
+  /**
+   * Create a user.
+   *
+   * @param array $data
+   *   Array of data:
+   *     - name - string (required)
+   *     - email - string (required)
+   *     - password - string (required)
+   *     - username - string (required)
+   *     - active - bool
+   *     - approved - bool.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function createUser(array $data) {
+    $uri = '/users.json';
+    return $this->postRequest($uri, $data);
+  }
+
+  /**
+   * Delete a user.
+   *
+   * @param string $user_id
+   *   The user id.
+   * @param array $data
+   *   Array of data:
+   *     - delete_posts - bool
+   *     - block_email - bool
+   *     - block_urls - bool
+   *     - block_ip - bool.
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function deleteUser(string $user_id, array $data) {
+    $uri = sprintf('/admin/users/%s.json', $user_id);
+    return $this->deleteRequest($uri, $data);
   }
 
   /**
@@ -633,13 +714,16 @@ class DiscourseApiClient {
    *
    * @param string $uri
    *   Request path.
+   * @param array $data
+   *   Data for the request.
    *
    * @return string|bool
    *   JSON or FALSE.
    */
-  private function deleteRequest(string $uri) {
+  private function deleteRequest(string $uri, array $data = []) {
     try {
       $response = $this->client->delete($uri, [
+        'form_params' => $data,
         'headers' => $this->apiHeaders,
       ]);
       return $response->getBody()->getContents();
