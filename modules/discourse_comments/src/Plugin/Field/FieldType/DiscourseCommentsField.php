@@ -24,25 +24,25 @@ class DiscourseCommentsField extends FieldItemBase {
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     // Prevent early t() calls by using the TranslatableMarkup.
     $properties['topic_id'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Topic id on Discourse'))
-      ->setDescription(t('Topic id on Discourse'))
+      ->setLabel(new TranslatableMarkup('Discourse Topic ID'))
+      ->setDescription(t('Discourse Topic ID'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['topic_url'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Discourse Topic URL'))
-      ->setDescription(t('Topic URL on Discourse'))
+      ->setDescription(t('Discourse Topic URL'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['comment_count'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Comment count for topic on discourse'))
-      ->setDescription(t('Topic id on Discourse'))
+      ->setLabel(new TranslatableMarkup('Discourse Comment Count'))
+      ->setDescription(t('Comment count for topic on Discourse'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['push_to_discourse'] = DataDefinition::create('boolean')
-      ->setLabel(new TranslatableMarkup('Push node to discourse forum'))
+      ->setLabel(new TranslatableMarkup('Push node to Discourse'))
       ->setSettings([
         'display_label' => TRUE,
       ]);

@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\discourse\DiscourseApiClient;
 use Drupal\group\Entity\Group;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -77,7 +76,7 @@ class DiscourseGroupsWidget extends WidgetBase {
     }
 
     $element['push_to_discourse'] = [
-      '#title' => $this->t('Push group to Discourse'),
+      '#title' => $this->t('Push Group to Discourse'),
       '#description' => $this->t('NOTE: Disabling this after the group is
         pushed to Discourse will not remove the group from Discourse.'),
       '#type' => 'checkbox',

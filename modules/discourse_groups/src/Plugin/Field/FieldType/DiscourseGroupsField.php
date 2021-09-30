@@ -24,25 +24,25 @@ class DiscourseGroupsField extends FieldItemBase {
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     // Prevent early t() calls by using the TranslatableMarkup.
     $properties['category_id'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Category id on Discourse'))
+      ->setLabel(new TranslatableMarkup('Discourse Category ID'))
       ->setDescription(t('Discourse Category ID'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['group_id'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Group id on Discourse'))
+      ->setLabel(new TranslatableMarkup('Discourse Group ID'))
       ->setDescription(t('Discourse Group ID'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['group_name'] = DataDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Discourse Group name'))
+      ->setLabel(new TranslatableMarkup('Discourse Group Name'))
       ->setDescription(t('Discourse Group Name'))
       ->setSetting('case_sensitive', TRUE)
       ->setRequired(FALSE);
 
     $properties['push_to_discourse'] = DataDefinition::create('boolean')
-      ->setLabel(new TranslatableMarkup('Push node to discourse forum'))
+      ->setLabel(new TranslatableMarkup('Push Group to Discourse'))
       ->setSettings([
         'display_label' => TRUE,
       ]);

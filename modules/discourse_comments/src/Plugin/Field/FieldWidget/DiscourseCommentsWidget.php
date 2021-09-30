@@ -90,7 +90,7 @@ class DiscourseCommentsWidget extends WidgetBase {
     ];
 
     $element['push_to_discourse'] = [
-      '#title' => $this->t('Push node to Discourse forum'),
+      '#title' => $this->t('Push node to Discourse'),
       '#description' => $this->t('NOTE: Disabling this after the node is
         published to Discourse will not remove the post on Discourse.'),
       '#type' => 'checkbox',
@@ -117,7 +117,7 @@ class DiscourseCommentsWidget extends WidgetBase {
 
     $element['topic_id'] = [
       '#type' => 'number',
-      '#title' => $this->t('Topic id on Discourse'),
+      '#title' => $this->t('Discourse Topic ID'),
       '#default_value' => isset($items[$delta]->topic_id) ? $items[$delta]->topic_id : NULL,
       '#size' => 5,
       '#disabled' => TRUE,
