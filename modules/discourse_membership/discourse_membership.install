@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * The discourse membership install file.
+ */
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Implements hook_install().
+ */
+function discourse_membership_install() {
+  // Generate discourse field.
+  $field_name = 'field_discourse_user';
+  if (empty(FieldStorageConfig::loadByName('user', $field_name))) {
+    $fieldStorage = FieldStorageConfig::create([
+      'field_name'             => $field_name,
+      'langcode'               => 'en',
+      'entity_type'            => 'user',
+      'type'                   => 'discourse_user_field',
+      'locked'                 => FALSE,
+      'cardinality'            => 1,
+      'translatable'           => TRUE,
+      'persist_with_no_fields' => TRUE,
+      'custom_storage'         => FALSE,
+    ]);
+    $fieldStorage->save();
+  }
+
+  $field_manager = \Drupal::service('entity_field.manager');
+  $field_storage_manager = \Drupal::service('field_storage_definition.listener');
+  $definition = $field_manager->getFieldStorageDefinitions('user')['field_discourse_user'];
+  $field_storage_manager->onFieldStorageDefinitionCreate($definition);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function discourse_membership_uninstall() {
+  // Deleting field.
+  $field = FieldConfig::loadByName('user', '', 'field_discourse_groups');
+  if (!empty($field)) {
+    $field->delete();
+  }
+
+  // Deleting field storage.
+  FieldStorageConfig::loadByName('group', 'field_discourse_groups')->delete();
+}

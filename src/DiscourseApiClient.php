@@ -633,6 +633,23 @@ class DiscourseApiClient {
   }
 
   /**
+   * Update a user's name (Display name).
+   *
+   * @param string $username
+   *   Discourse user id.
+   * @param array $data
+   *   Array formatted like:
+   *     ['name' => 'name value'].
+   *
+   * @return string|bool
+   *   Returns JSON response or FALSE.
+   */
+  public function updateUserName(string $username, array $data) {
+    $uri = sprintf('/u/%s.json', $username);
+    return $this->putRequest($uri, $data);
+  }
+
+  /**
    * Get Request.
    *
    * @param string $uri

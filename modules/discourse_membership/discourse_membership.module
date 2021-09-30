@@ -1,0 +1,114 @@
+<?php
+
+/**
+ * @file
+ * Contains discourse membership module.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function discourse_membership_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+
+  // Add a 'discourse_groups_field' base field to all node types.
+  if ($entity_type->id() === 'user') {
+    $fields['discourse_user_field'] = BaseFieldDefinition::create('discourse_user_field')
+      ->setLabel(t('Discourse User'))
+      ->setDescription(t('Discourse User settings.'))
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayOptions('form', [
+        'type' => 'discourse_user_widget',
+        'weight' => 100,
+      ])
+      ->setDisplayConfigurable('form', TRUE);
+  }
+
+  return $fields;
+}
+
+/**
+ * Implements hook_form_BASE_ID_alter().
+ */
+function discourse_membership_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // If discourse groups is enabled.
+  if (isset($form['discourse_user_field'])) {
+    $user = $form_state->getFormObject()->getEntity();
+    // Checking edit form.
+    if ($form_state->getFormObject()->getOperation() == 'edit') {
+      if ($user->get('discourse_user_field')->push_to_discourse != 1) {
+        // If push_to_discourse is not enabled.
+        $form['discourse_user_field']['widget'][0]['push_to_discourse']['#default_value'] = 0;
+      }
+    }
+    $form['actions']['submit']['#submit'][] = '_post_user_to_discourse';
+  }
+}
+
+/**
+ * Post group to discourse.
+ */
+function _post_user_to_discourse($form, FormStateInterface &$form_state) {
+  $form_values = $form_state->getValues();
+  $user = $form_state->getFormObject()->getEntity();
+  $discourse_user_id = $user->get('discourse_user_field')->user_id;
+  $post_condition = $discourse_user_id == NULL && $discourse_user_id !== '' && $form_values['discourse_user_field'][0]['push_to_discourse'] == 1;
+  // New group.
+  if ($post_condition) {
+    $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+
+    // Create the discourse group.
+    $user_response = $discourse_api_client->createUser([
+      'name' => $form_values['name'],
+      'email' => $form_values['mail'],
+      'password' => user_password(10),
+      'username' => $form_values['name'],
+      'active' => TRUE,
+      'approved' => TRUE,
+      'user_fields[1]' => TRUE,
+    ]);
+
+    $created_user = Json::decode($user_response);
+
+    // Get user details and save it in discourse field of the user.
+    $discourse_form_values = $form_values['discourse_user_field'];
+    $discourse_form_values[0]['user_id'] = $created_user['user_id'];
+    $discourse_form_values[0]['username'] = $form_values['name'];
+
+    // Change the discourse_groups_field according to returned values.
+    $user->set('discourse_user_field', $discourse_form_values);
+    $user->save();
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function discourse_membership_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+  switch ($route_name) {
+    // Main module help for the discourse module.
+    case 'help.page.discourse':
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Discourse API and Membership integration.') . '</p>';
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * @todo do we need to delete users in discourse?
+ */
+function discourse_membership_entity_delete(EntityInterface $entity) {
+
+}
