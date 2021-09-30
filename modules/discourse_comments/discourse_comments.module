@@ -68,7 +68,7 @@ function discourse_comments_entity_base_field_info(EntityTypeInterface $entity_t
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function discourse_comments_form_node_form_alter(&$form, &$form_state, $form_id) {
+function discourse_comments_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // If discourse enabled.
   if (isset($form['discourse_comments_field'])) {
     $node = $form_state->getFormObject()->getEntity();
@@ -83,8 +83,8 @@ function discourse_comments_form_node_form_alter(&$form, &$form_state, $form_id)
 
     // Set title field help text.
     $config_factory = \Drupal::service('config.factory');
-    $discoursse_settings = $config_factory->get('discourse.discourse_settings');
-    $content_types_enabled_for_discourse = $discoursse_settings->get('content_types_enabled_for_discourse');
+    $discourse_settings = $config_factory->get('discourse.discourse_settings');
+    $content_types_enabled_for_discourse = $discourse_settings->get('content_types_enabled_for_discourse');
     $node_type = $node->getType();
     if (isset($content_types_enabled_for_discourse[$node_type]) && $content_types_enabled_for_discourse[$node_type]) {
       $form['title']['widget'][0]['value']['#description'] = FieldFilteredMarkup::create(t('The title should have at least 15 characters else it may not be pushed as a discourse topic.'));

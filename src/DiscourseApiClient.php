@@ -524,24 +524,6 @@ class DiscourseApiClient {
   }
 
   /**
-   * Get a group id.
-   *
-   * Because the getGroup method requires a name, not id this helper
-   * method provides the group id for a given group name.
-   *
-   * @param string $group_name
-   *   The name of the group.
-   *
-   * @return string
-   *   Returns the id of the group.
-   */
-  public function getGroupId(string $group_name) {
-    $group = $this->getGroup($group_name);
-    $group_array = Json::decode($group);
-    return $group_array['group']['id'];
-  }
-
-  /**
    * Delete a group.
    *
    * @param int $group_id
