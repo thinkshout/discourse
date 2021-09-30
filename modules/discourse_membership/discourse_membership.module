@@ -161,7 +161,7 @@ function discourse_membership_entity_presave(EntityInterface $entity) {
               'user_fields[1]' => TRUE,
             ]);
             $created_user = Json::decode($created_user_response);
-            if ($created_user['user_id']) {
+            if (isset($created_user['user_id']) && !empty($created_user['user_id'])) {
               $discourse_api_client->addUsersToGroup($group_id, $user->getAccountName());
               // Save the discourse user values back to the Drupal user.
               $user->discourse_user_field->username = $user->getAccountName();
