@@ -10,6 +10,8 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Http\ClientFactory;
+use Drupal\Core\Session\AccountProxy;
+use Drupal\user\Entity\User;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ClientException;
@@ -93,8 +95,10 @@ class DiscourseApiClient {
    *   EntityTypeManager service.
    * @param \Drupal\Core\Database\Connection $database
    *   Database service.
+   * @param \Drupal\Core\Session\AccountProxy $current_user
+   *   Current user service.
    */
-  public function __construct(ClientFactory $http_client_factory, ConfigFactory $config_factory, CacheBackendInterface $cacheBackend, TimeInterface $time, EntityTypeManagerInterface $entity_type_manager, Connection $database) {
+  public function __construct(ClientFactory $http_client_factory, ConfigFactory $config_factory, CacheBackendInterface $cacheBackend, TimeInterface $time, EntityTypeManagerInterface $entity_type_manager, Connection $database, AccountProxy $current_user) {
     $discourseSettings = $config_factory->get('discourse.discourse_settings');
     try {
       $this->baseUrl = $discourseSettings->get('base_url_of_discourse');
@@ -112,6 +116,7 @@ class DiscourseApiClient {
       $this->configFactory = $discourseSettings;
       $this->entityTypeManager = $entity_type_manager;
       $this->database = $database;
+      $this->currentUser = $current_user;
     }
     catch (ConnectException $e) {
       watchdog_exception('discourse', $e);
@@ -173,6 +178,42 @@ class DiscourseApiClient {
     }
     catch (GuzzleException $e) {
       watchdog_exception('discourse', $e);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Get list of categories from discourse.
+   *
+   * @return \Psr\Http\Message\StreamInterface|bool
+   *   Returns list of categories from discourse.
+   */
+  public function getCurrentUserCategories() {
+    $current_user = User::load($this->currentUser->getAccount()->id());
+    $discourse_username = $current_user->get('discourse_user_field')->username;
+
+    if ($discourse_username) {
+      $uri = sprintf('/categories.json');
+      $headers = $this->apiHeaders;
+      $headers['Api-Username'] = $discourse_username;
+
+      try {
+        $response = $this->client->get($uri, [
+          'headers' => $headers,
+        ]);
+
+        $data = Json::decode($response->getBody());
+        // $time_value = $this->time->getCurrentTime();
+        // 12 hours cache time for categories data.
+        // $this->cache->set('discourse_category', $data, $time_value + 43200);
+        return $data;
+      }
+      catch (ConnectException $e) {
+        watchdog_exception('discourse', $e);
+      }
+      catch (GuzzleException $e) {
+        watchdog_exception('discourse', $e);
+      }
     }
     return FALSE;
   }
