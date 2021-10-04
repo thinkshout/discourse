@@ -73,7 +73,7 @@ class LatestCommentsBlock extends BlockBase implements ContainerFactoryPluginInt
     $build['#content'] = $content;
     $build['#count'] = $count;
 
-    $cache_lifetime = $this->configFactory->get('discourse.discourse_comments_settings')->get('cache_lifetime');
+    $cache_lifetime = $this->configFactory->get('discourse_comments.discourse_comments_settings')->get('cache_lifetime');
     $build['#cache'] = [
       'tags' => ['latest_comment_block'],
       'contexts' => ['url.path'],

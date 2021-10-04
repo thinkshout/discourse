@@ -76,7 +76,7 @@ class DiscourseCommentsWidget extends WidgetBase {
       $content_type = $node->getType();
     }
 
-    $discourse_comments_config = $this->configFactory->get('discourse.discourse_comments_settings');
+    $discourse_comments_config = $this->configFactory->get('discourse_comments.discourse_comments_settings');
     $content_types_enabled_for_discourse = $discourse_comments_config->get('content_types_enabled_for_discourse');
     $default_content_type_setting = 0;
     if (isset($content_types_enabled_for_discourse[$content_type]) && $content_types_enabled_for_discourse[$content_type]) {

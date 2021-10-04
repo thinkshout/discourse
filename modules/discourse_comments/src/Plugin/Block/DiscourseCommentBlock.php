@@ -65,7 +65,7 @@ class DiscourseCommentBlock extends BlockBase implements ContainerFactoryPluginI
     $build = [];
 
     $node = $this->currentRouteMatch->getParameter('node');
-    $discourse_settings = $this->configFactory->get('discourse.discourse_comments_settings');
+    $discourse_settings = $this->configFactory->get('discourse_comments.discourse_comments_settings');
     if ($node instanceof NodeInterface && $node->hasField('discourse_comments_field')) {
       $field_discourse_comments = $node->get('discourse_comments_field')->getValue();
       if (isset($field_discourse_comments[0]['topic_id']) && is_numeric($field_discourse_comments[0]['topic_id'])) {

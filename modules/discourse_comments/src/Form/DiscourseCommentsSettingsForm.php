@@ -40,7 +40,7 @@ class DiscourseCommentsSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'discourse.discourse_comments_settings',
+      'discourse_comments.discourse_comments_settings',
     ];
   }
 
@@ -55,7 +55,7 @@ class DiscourseCommentsSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('discourse.discourse_comments_settings');
+    $config = $this->config('discourse_comments.discourse_comments_settings');
     $form['forum_link'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Forum Link (base domain) to display the above comments'),
@@ -130,7 +130,7 @@ class DiscourseCommentsSettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $content_types_enabled = $form_state->getValue('content_types_enabled_for_discourse');
-    $this->config('discourse.discourse_comments_settings')
+    $this->config('discourse_comments.discourse_comments_settings')
       ->set('forum_link', $form_state->getValue('forum_link'))
       ->set('forum_link_label', $form_state->getValue('forum_link_label'))
       ->set('cache_lifetime', $form_state->getValue('cache_lifetime'))
