@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\group\Entity\GroupContentInterface;
 
 /**
  * Implements hook_entity_base_field_info().
@@ -138,39 +139,57 @@ function discourse_membership_entity_presave(EntityInterface $entity) {
   switch ($entity->getEntityTypeId()) {
     // Act on new group memberships.
     case 'group_content':
-      if ($entity->getContentPlugin()->getPluginId() == 'group_membership') {
-        $group = $entity->getGroup();
-        // Check for discourse category id field value.
-        if ($group->hasField('discourse_groups_field') && ($group_id = $group->get('discourse_groups_field')->group_id) && !empty($group_id)) {
-          $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
-          $user = $entity->get('entity_id')->entity;
-          // If the user exists in Discourse.
-          if (($discourse_username = $user->get('discourse_user_field')->username) && !empty($discourse_username)) {
-            $discourse_api_client->addUsersToGroup($group_id, $discourse_username);
-          }
-          // Otherwise, the user isn't yet in Discourse.
-          else {
-            // Create the discourse user.
-            $created_user_response = $discourse_api_client->createUser([
-              'name' => $user->getAccountName(),
-              'email' => $user->getEmail(),
-              'password' => user_password(10),
-              'username' => $user->getAccountName(),
-              'active' => TRUE,
-              'approved' => TRUE,
-              'user_fields[1]' => TRUE,
-            ]);
-            $created_user = Json::decode($created_user_response);
-            if (isset($created_user['user_id']) && !empty($created_user['user_id'])) {
-              $discourse_api_client->addUsersToGroup($group_id, $user->getAccountName());
-              // Save the discourse user values back to the Drupal user.
-              $user->discourse_user_field->username = $user->getAccountName();
-              $user->discourse_user_field->user_id = $created_user['user_id'];
-              $user->save();
-            }
-          }
-        }
-      }
+      /** @var \Drupal\group\Entity\GroupContentInterface $entity */
+      discourse_membership_sync_membership($entity);
       break;
+  }
+}
+
+/**
+ * Sync a group membership entity to Discourse.
+ *
+ * @param \Drupal\group\Entity\GroupContentInterface $group_content
+ *   The group membership entity.
+ *
+ * @return void
+ */
+function discourse_membership_sync_membership(GroupContentInterface $group_content) {
+  if ($group_content->getContentPlugin()->getPluginId() != 'group_membership') {
+    return;
+  }
+
+  $group = $group_content->getGroup();
+  $group_id = $group->discourse_groups_field->group_id ?? NULL;
+  // Check for discourse category id field value.
+  if (!$group_id) {
+    return;
+  }
+
+  $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+  $user = $group_content->get('entity_id')->entity;
+  $discourse_username = $user->get('discourse_user_field')->username;
+  if ($discourse_username) {
+    // The user exists in Discourse.
+    $discourse_api_client->addUsersToGroup($group_id, $discourse_username);
+  }
+  else {
+    // Create the discourse user.
+    $created_user_response = $discourse_api_client->createUser([
+      'name' => $user->getAccountName(),
+      'email' => $user->getEmail(),
+      'password' => user_password(10),
+      'username' => $user->getAccountName(),
+      'active' => TRUE,
+      'approved' => TRUE,
+      'user_fields[1]' => TRUE,
+    ]);
+    $created_user = Json::decode($created_user_response);
+    if (isset($created_user['user_id']) && !empty($created_user['user_id'])) {
+      $discourse_api_client->addUsersToGroup($group_id, $user->getAccountName());
+      // Save the discourse user values back to the Drupal user.
+      $user->discourse_user_field->username = $user->getAccountName();
+      $user->discourse_user_field->user_id = $created_user['user_id'];
+      $user->save();
+    }
   }
 }
