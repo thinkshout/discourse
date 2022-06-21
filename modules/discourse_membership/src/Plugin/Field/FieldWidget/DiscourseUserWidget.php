@@ -54,6 +54,7 @@ class DiscourseUserWidget extends WidgetBase {
       '#type' => 'details',
       '#group' => 'advanced',
       '#weight' => 0,
+      '#access' => \Drupal::currentUser()->hasPermission('manage discourse connections'),
     ];
 
     return $element;
