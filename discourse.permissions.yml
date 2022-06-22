@@ -1,0 +1,4 @@
+manage discourse connections:
+  title: 'Manage Discourse connections'
+  description: 'See and edit fields related to Discourse "mappings" on Users. (Will apply to Groups and Discussions in the future).'
+  restrict access: TRUE

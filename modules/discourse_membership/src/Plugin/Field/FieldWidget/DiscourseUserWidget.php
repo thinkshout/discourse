@@ -32,12 +32,24 @@ class DiscourseUserWidget extends WidgetBase {
       '#default_value' => isset($items[$delta]->push_to_discourse) ? $items[$delta]->push_to_discourse : TRUE,
     ];
 
+    $element['allow_override'] = [
+      '#title' => $this->t('Allow manual override of discourse connection fields.'),
+      '#description' => $this->t('WARNING: use with care. It is generally advised not to use this option, unless something has gone wrong with this user/discourse connection.'),
+      '#type' => 'checkbox',
+      '#default_value' => FALSE,
+    ];
+
+    $allowed_selector = "discourse_user_field[" . $delta . "][allow_override]";
     $element['user_id'] = [
       '#type' => 'number',
       '#title' => $this->t('Discourse User ID'),
       '#default_value' => isset($items[$delta]->user_id) ? $items[$delta]->user_id : NULL,
       '#size' => 5,
-      '#disabled' => TRUE,
+      '#states' => [
+        'enabled' => [
+          ':input[name="' . $allowed_selector . '"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $element['username'] = [
@@ -47,13 +59,18 @@ class DiscourseUserWidget extends WidgetBase {
       '#size' => 60,
       '#placeholder' => '',
       '#maxlength' => 256,
-      '#disabled' => TRUE,
+      '#states' => [
+        'enabled' => [
+          ':input[name="' . $allowed_selector . '"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $element += [
       '#type' => 'details',
       '#group' => 'advanced',
       '#weight' => 0,
+      '#access' => \Drupal::currentUser()->hasPermission('manage discourse connections'),
     ];
 
     return $element;
