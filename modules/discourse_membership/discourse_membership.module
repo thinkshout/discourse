@@ -10,6 +10,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\user\Entity\User;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\group\Entity\GroupContentInterface;
 
@@ -192,4 +193,25 @@ function discourse_membership_sync_membership(GroupContentInterface $group_conte
       $user->save();
     }
   }
+}
+
+/**
+ * Implements hook_discourse_sso_parameters_alter().
+ */
+function discourse_membership_discourse_sso_parameters_alter(&$parameters) {
+  // If a user is SSO'ing and including a "username" parameter, this acts as an
+  // instruction to Discourse to update the Discourse username. That means we
+  // need to update our username on file.
+  if (empty($parameters['external_id']) || !is_numeric($parameters['external_id'])) {
+    return;
+  }
+  $account = User::load($parameters['external_id']);
+  if (empty($account) || empty($account->get('discourse_user_field'))) {
+    return;
+  }
+  if (empty($account->discourse_user_field->username) || $account->discourse_user_field->username == $parameters['username']) {
+    return;
+  }
+  $account->discourse_user_field->username = $parameters['username'];
+  $account->save();
 }
