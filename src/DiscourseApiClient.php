@@ -473,6 +473,20 @@ class DiscourseApiClient {
   }
 
   /**
+   * Get the list of users from Discourse.
+   *
+   * @param int $page
+   *   For multiple pages of results, call repeatedly and increment value.
+   *
+   * @return bool|string
+   *   JSON response or FALSE.
+   */
+  public function getUsers($page = 1) {
+    $uri = '/admin/users/list/new.json?page=' . $page;
+    return $this->getRequest($uri);
+  }
+
+  /**
    * Creates a category.
    *
    * @param array $data
