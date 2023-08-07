@@ -481,8 +481,11 @@ class DiscourseApiClient {
    * @return bool|string
    *   JSON response or FALSE.
    */
-  public function getUsers($page = 1) {
+  public function getUsers($page = 1, array $params = []) {
     $uri = '/admin/users/list/new.json?page=' . $page;
+    if (!empty($params)) {
+      $uri .= '&' . \GuzzleHttp\http_build_query($params);
+    }
     return $this->getRequest($uri);
   }
 
