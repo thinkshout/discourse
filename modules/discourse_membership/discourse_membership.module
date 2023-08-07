@@ -65,25 +65,24 @@ function _post_user_to_discourse($form, FormStateInterface &$form_state) {
   $post_condition = $discourse_user_id == NULL && $discourse_user_id !== '' && $form_values['discourse_user_field'][0]['push_to_discourse'] == 1;
   // New group.
   if ($post_condition) {
-    $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
-
     // Create the discourse group.
-    $user_response = $discourse_api_client->createUser([
+    $data = [
       'name' => $form_values['name'],
       'email' => $form_values['mail'],
       'password' => user_password(10),
-      'username' => $form_values['name'],
+      'username' => substr(preg_replace("/[^A-Za-z0-9_\-\.]/", '', $form_values['name']), 0, 20),
       'active' => TRUE,
       'approved' => TRUE,
       'user_fields[1]' => TRUE,
-    ]);
-
-    $created_user = Json::decode($user_response);
+    ];
+    $created_user = discourse_membership_fetch_or_create_user($data);
 
     // Get user details and save it in discourse field of the user.
     $discourse_form_values = $form_values['discourse_user_field'];
     $discourse_form_values[0]['user_id'] = $created_user['user_id'];
-    $discourse_form_values[0]['username'] = $form_values['name'];
+    $discourse_form_values[0]['username'] = !empty($created_user['username'])
+      ? $created_user['username']
+      : $data['username'];
 
     // Change the discourse_groups_field according to returned values.
     $user->set('discourse_user_field', $discourse_form_values);
@@ -175,23 +174,42 @@ function discourse_membership_sync_membership(GroupContentInterface $group_conte
   }
   else {
     // Create the discourse user.
-    $created_user_response = $discourse_api_client->createUser([
+    $data = [
       'name' => $user->getAccountName(),
       'email' => $user->getEmail(),
       'password' => user_password(10),
-      'username' => $user->getAccountName(),
+      'username' => substr(preg_replace("/[^A-Za-z0-9_\-\.]/", '', $user->getAccountName()), 0, 20),
       'active' => TRUE,
       'approved' => TRUE,
       'user_fields[1]' => TRUE,
-    ]);
-    $created_user = Json::decode($created_user_response);
+    ];
+    $created_user = discourse_membership_fetch_or_create_user($data);
     if (isset($created_user['user_id']) && !empty($created_user['user_id'])) {
       $discourse_api_client->addUsersToGroup($group_id, $user->getAccountName());
       // Save the discourse user values back to the Drupal user.
-      $user->discourse_user_field->username = $user->getAccountName();
+      $user->discourse_user_field->username = $data['username'];
       $user->discourse_user_field->user_id = $created_user['user_id'];
+      $user->discourse_user_field->push_to_discourse = 1;
       $user->save();
     }
+  }
+}
+
+function discourse_membership_fetch_or_create_user(array $data) {
+  /** @var \Drupal\discourse\DiscourseApiClient $discourse_api_client */
+  $discourse_api_client = \Drupal::service('discourse.discourse_api_client');
+  // Search discourse for the user, given the email.
+  $get_user = Json::decode($discourse_api_client->getUsers(1, [
+    'show_emails' => TRUE,
+    'filter' => $data['email'],
+  ]));
+  // If user exists, return existing.
+  if (!empty($get_user)) {
+    return $get_user[0];
+  }
+  else {
+    // If not user exists, create and return new account.
+    return Json::decode($discourse_api_client->createUser($data));
   }
 }
 
