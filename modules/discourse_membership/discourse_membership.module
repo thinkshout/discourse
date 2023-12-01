@@ -71,7 +71,7 @@ function _post_user_to_discourse($form, FormStateInterface &$form_state) {
     $user_response = $discourse_api_client->createUser([
       'name' => $form_values['name'],
       'email' => $form_values['mail'],
-      'password' => user_password(10),
+      'password' => \Drupal::service('password_generator')->generate(10),
       'username' => $form_values['name'],
       'active' => TRUE,
       'approved' => TRUE,
@@ -178,7 +178,7 @@ function discourse_membership_sync_membership(GroupContentInterface $group_conte
     $created_user_response = $discourse_api_client->createUser([
       'name' => $user->getAccountName(),
       'email' => $user->getEmail(),
-      'password' => user_password(10),
+      'password' => \Drupal::service('password_generator')->generate(10),
       'username' => $user->getAccountName(),
       'active' => TRUE,
       'approved' => TRUE,

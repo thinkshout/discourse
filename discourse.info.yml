@@ -1,6 +1,6 @@
 name: Discourse
 type: module
 description: 'Discourse API integration.'
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^8.8 || ^9 || ^10
 package: 'Discourse'
 configure: discourse.admin_config_discourse
