@@ -10,7 +10,9 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Http\ClientFactory;
+use Drupal\Core\Logger\LoggerChannelFactory;
 use Drupal\Core\Session\AccountProxy;
+use Drupal\Core\Utility\Error;
 use Drupal\user\Entity\User;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -81,6 +83,13 @@ class DiscourseApiClient {
   protected $database;
 
   /**
+   * Logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactory
+   */
+  protected $loggerFactory;
+
+  /**
    * CatFactsClient constructor.
    *
    * @param \Drupal\Core\Http\ClientFactory $http_client_factory
@@ -97,9 +106,12 @@ class DiscourseApiClient {
    *   Database service.
    * @param \Drupal\Core\Session\AccountProxy $current_user
    *   Current user service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactory $logger_factory
+   *   Current user service.
    */
-  public function __construct(ClientFactory $http_client_factory, ConfigFactory $config_factory, CacheBackendInterface $cacheBackend, TimeInterface $time, EntityTypeManagerInterface $entity_type_manager, Connection $database, AccountProxy $current_user) {
+  public function __construct(ClientFactory $http_client_factory, ConfigFactory $config_factory, CacheBackendInterface $cacheBackend, TimeInterface $time, EntityTypeManagerInterface $entity_type_manager, Connection $database, AccountProxy $current_user, LoggerChannelFactory $logger_factory) {
     $discourseSettings = $config_factory->get('discourse.discourse_settings');
+    $this->loggerFactory = $logger_factory;
     try {
       $this->baseUrl = $discourseSettings->get('base_url_of_discourse');
       $this->apiHeaders = [
@@ -119,10 +131,7 @@ class DiscourseApiClient {
       $this->currentUser = $current_user;
     }
     catch (ConnectException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
   }
 
@@ -145,7 +154,7 @@ class DiscourseApiClient {
       return $response->getBody()->getContents();
     }
     catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
 
     return FALSE;
@@ -173,11 +182,8 @@ class DiscourseApiClient {
       $this->cache->set('discourse_category', $data, $time_value + 43200);
       return $data;
     }
-    catch (ConnectException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+    catch (ConnectException | GuzzleException $e) {
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
@@ -208,11 +214,8 @@ class DiscourseApiClient {
         // $this->cache->set('discourse_category', $data, $time_value + 43200);
         return $data;
       }
-      catch (ConnectException $e) {
-        watchdog_exception('discourse', $e);
-      }
-      catch (GuzzleException $e) {
-        watchdog_exception('discourse', $e);
+      catch (ConnectException | GuzzleException $e) {
+        Error::logException($this->loggerFactory->get('discourse'), $e);
       }
     }
     return FALSE;
@@ -240,11 +243,8 @@ class DiscourseApiClient {
       ]);
       return $response->getBody()->getContents();
     }
-    catch (ConnectException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+    catch (ConnectException|GuzzleException $e) {
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
   }
 
@@ -463,11 +463,8 @@ class DiscourseApiClient {
       $this->cache->set('discourse_latest_comments', $latest_comments, $time_value + $cache_lifetime);
       return $latest_comments;
     }
-    catch (ConnectException $e) {
-      watchdog_exception('discourse', $e);
-    }
-    catch (GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+    catch (ConnectException | GuzzleException $e) {
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
@@ -484,7 +481,7 @@ class DiscourseApiClient {
   public function getUsers($page = 1, array $params = []) {
     $uri = '/admin/users/list/new.json?page=' . $page;
     if (!empty($params)) {
-      $uri .= '&' . \GuzzleHttp\http_build_query($params);
+      $uri .= '&' . \http_build_query($params);
     }
     return $this->getRequest($uri);
   }
@@ -724,7 +721,7 @@ class DiscourseApiClient {
       return $response->getBody()->getContents();
     }
     catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
@@ -754,7 +751,7 @@ class DiscourseApiClient {
       return $response->getBody()->getContents();
     }
     catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
@@ -779,7 +776,7 @@ class DiscourseApiClient {
       return $response->getBody()->getContents();
     }
     catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
@@ -804,7 +801,7 @@ class DiscourseApiClient {
       return $response->getBody()->getContents();
     }
     catch (ConnectException | ClientException | RequestException | GuzzleException $e) {
-      watchdog_exception('discourse', $e);
+      Error::logException($this->loggerFactory->get('discourse'), $e);
     }
     return FALSE;
   }
