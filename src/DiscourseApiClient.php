@@ -326,7 +326,7 @@ class DiscourseApiClient {
    *   Returns default avatar image path.
    */
   public function getDefaultAvatar() {
-    return sprintf('%s/%s', drupal_get_path('module', 'discourse'), 'images/user-default.png');
+    return sprintf('%s/%s', \Drupal::service('extension.list.module')->getPath('discourse'), 'images/user-default.png');
   }
 
   /**

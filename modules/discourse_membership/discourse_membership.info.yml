@@ -1,7 +1,7 @@
 name: Discourse Membership
 type: module
 description: 'Discourse API integration for users and group membership'
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^8.8 || ^9 || ^10
 package: 'Discourse'
 dependencies:
   - discourse

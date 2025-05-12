@@ -69,7 +69,7 @@ function _post_user_to_discourse($form, FormStateInterface &$form_state) {
     $data = [
       'name' => $form_values['name'],
       'email' => $form_values['mail'],
-      'password' => user_password(10),
+      'password' => \Drupal::service('password_generator')->generate(10),
       'username' => substr(preg_replace("/[^A-Za-z0-9_\-\.]/", '', $form_values['name']), 0, 20),
       'active' => TRUE,
       'approved' => TRUE,
@@ -177,7 +177,7 @@ function discourse_membership_sync_membership(GroupContentInterface $group_conte
     $data = [
       'name' => $user->getAccountName(),
       'email' => $user->getEmail(),
-      'password' => user_password(10),
+      'password' => \Drupal::service('password_generator')->generate(10),
       'username' => substr(preg_replace("/[^A-Za-z0-9_\-\.]/", '', $user->getAccountName()), 0, 20),
       'active' => TRUE,
       'approved' => TRUE,

@@ -1,7 +1,7 @@
 name: Discourse Comments
 type: module
 description: 'Discourse topics and comments integration.'
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^8.8 || ^9 || ^10
 package: 'Discourse'
 configure: discourse_comments.discourse_comments_settings_form
 dependencies:
