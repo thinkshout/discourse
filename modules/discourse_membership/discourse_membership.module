@@ -190,6 +190,7 @@ function discourse_membership_sync_membership(GroupContentInterface $group_conte
       // Save the discourse user values back to the Drupal user.
       $user->discourse_user_field->username = $user->getAccountName();
       $user->discourse_user_field->user_id = $created_user['user_id'];
+      $user->discourse_user_field->push_to_discourse = 1;
       $user->save();
     }
   }
