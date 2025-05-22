@@ -204,8 +204,8 @@ function discourse_membership_fetch_or_create_user(array $data) {
     'filter' => $data['email'],
   ]));
   // If user exists, return existing.
-  if (!empty($get_user)) {
-    return $get_user[0];
+  if (!empty($get_user['users'])) {
+    return current($get_user['users']);
   }
   else {
     // If not user exists, create and return new account.

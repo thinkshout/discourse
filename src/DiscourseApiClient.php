@@ -481,7 +481,7 @@ class DiscourseApiClient {
   public function getUsers($page = 1, array $params = []) {
     $uri = '/admin/users/list/new.json?page=' . $page;
     if (!empty($params)) {
-      $uri .= '&' . \http_build_query($params);
+      $uri .= '&' . http_build_query($params);
     }
     return $this->getRequest($uri);
   }
