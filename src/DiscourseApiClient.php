@@ -34,6 +34,13 @@ class DiscourseApiClient {
   protected $client;
 
   /**
+   * HTTP client factory.
+   *
+   * @var \Drupal\Core\Session\AccountProxy
+   */
+  protected $currentUser;
+
+  /**
    * Api headers.
    *
    * @var array|\Drupal\Core\Config\Config|\Drupal\Core\Config\ImmutableConfig|null
@@ -245,6 +252,7 @@ class DiscourseApiClient {
     }
     catch (ConnectException|GuzzleException $e) {
       Error::logException($this->loggerFactory->get('discourse'), $e);
+      return "";
     }
   }
 
